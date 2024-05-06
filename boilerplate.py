@@ -103,7 +103,7 @@ def main():
         return
 
     while True:
-        command = input("Enter a command ('create', 'import', 'exit'): ")
+        command = input("Enter a command ('create', 'import', 'transfer', 'exit'): ")
 
         if command == "create":
             create_account(args.mod)
