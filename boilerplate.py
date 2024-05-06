@@ -4,7 +4,7 @@ import os
 
 test_net = "https://api.testnet.solana.com"
 dev_net = "https://api.devnet.solana.com"
-amount = 10000000000  # 仅生成账户是需要使用
+amount = 1000000000  # 仅生成账户是需要使用
 
 
 def create_account(mod):
@@ -43,8 +43,8 @@ def import_account(file_path, mod):
 
 def write_to_txt(info1, info2):
     with open(f"{info1}.txt", "w") as file:
-        file.write(info1 + "\n")
-        file.write(info2 + "\n")
+        file.write(str(info1) + "\n")
+        file.write(str(info2) + "\n")
 
 
 def main():
