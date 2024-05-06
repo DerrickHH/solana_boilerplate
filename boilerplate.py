@@ -1,5 +1,6 @@
-from solathon import Client, Keypair, PublicKey
+from solathon import Client, Keypair, PublicKey, Transaction
 import argparse
+from solathon.core.instructions import transfer
 import os
 
 test_net = "https://api.testnet.solana.com"
@@ -41,6 +42,48 @@ def import_account(file_path, mod):
     print("Balance is: ", balance)
 
 
+def send_transaction(from_path, to_path, mod):
+    global client
+    if mod == "test":
+        client = Client(test_net)
+    if mod == "dev":
+        client = Client(dev_net)
+    from_key = []
+    with open(from_path, "r") as file:
+        for line in file:
+            line = line.strip()
+            from_key.append(line)
+    from_public_key = PublicKey(from_key[0])
+    from_balance = client.get_balance(from_public_key)
+    print("Balance of sender is: ", from_balance)
+    sender = Keypair().from_private_key(from_key[1])
+
+    to_key = []
+    with open(to_path, "r") as file:
+        for line in file:
+            line = line.strip()
+            to_key.append(line)
+    to_public_key = PublicKey(to_key[0])
+    to_balance = client.get_balance(to_public_key)
+    print("Balance of receiver is: ", to_balance)
+
+    amount = 10000
+
+    instruction = transfer(
+        from_public_key=sender.public_key,
+        to_public_key=to_public_key,
+        lamports=amount
+    )
+    transaction = Transaction(instructions=[instruction], signers=[sender])
+    result = client.send_transaction(transaction)
+    print(result)
+
+    from_balance = client.get_balance(from_public_key)
+    print("After transfer, balance of sender is: ", from_balance)
+    to_balance = client.get_balance(to_public_key)
+    print("After transfer, balance of receiver is: ", to_balance)
+
+
 def write_to_txt(info1, info2):
     with open(f"{info1}.txt", "w") as file:
         file.write(str(info1) + "\n")
@@ -55,17 +98,42 @@ def main():
 
     args = parser.parse_args()
 
-    if args.create:
-        if not args.mod:
-            parser.error("Please specify mod.")
-            return
-        create_account(args.mod)
+    if not args.mod:
+        parser.error("Please specify mod.")
+        return
 
-    if args.imports:
-        if not args.mod:
-            parser.error("Please specify mod.")
-            return
-        import_account(args.imports, args.mod)
+    while True:
+        command = input("Enter a command ('create', 'import', 'exit'): ")
+
+        if command == "create":
+            create_account(args.mod)
+
+        elif command == "import":
+            file_path = input("Enter file path: ")
+            import_account(file_path, args.mod)
+
+        elif command == "transfer":
+            from_path = input("Enter sender file: ")
+            to_path = input("Enter receiver file: ")
+            send_transaction(from_path, to_path, args.mod)
+
+        elif command == "exit":
+            break
+
+        else:
+            print("Invalid command.")
+
+    # if args.create:
+    #     if not args.mod:
+    #         parser.error("Please specify mod.")
+    #         return
+    #     create_account(args.mod)
+    #
+    # if args.imports:
+    #     if not args.mod:
+    #         parser.error("Please specify mod.")
+    #         return
+    #     import_account(args.imports, args.mod)
 
 
 if __name__ == '__main__':
