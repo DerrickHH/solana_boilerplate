@@ -2,8 +2,8 @@ from solathon import Client, Keypair, PublicKey
 import argparse
 import os
 
-test_net = "[https://api.testnet.solana.com](https://api.testnet.solana.com)"
-dev_net = "[https://api.devnet.solana.com](https://api.devnet.solana.com)"
+test_net = "https://api.testnet.solana.com"
+dev_net = "https://api.devnet.solana.com"
 amount = 10000000000  # 仅生成账户是需要使用
 
 
