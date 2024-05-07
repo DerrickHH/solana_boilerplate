@@ -33,14 +33,15 @@ async function createAccount(mod: string) {
     }
     
     const wallet = Keypair.generate();
-
-    fs.writeFile(`${wallet.publicKey}.txt`, `${wallet.publicKey}\n${wallet.secretKey}\n`, (err) => {
+    let encoded = bs58.encode(wallet.secretKey);
+    console.log("Encoded content is: ", encoded);
+    fs.writeFile(`${wallet.publicKey}.txt`, `${wallet.publicKey}\n${encoded}\n`, (err) => {
         if (err) {
             console.error('Error writing file:', err);
         } else {
             console.log('File has been written successfully.');
         }
-    })
+    });
 
     connection.onAccountChange(
         wallet.publicKey,
@@ -102,7 +103,7 @@ async function importAccount(filePath: string, mod: string) {
     console.log("Balance is: ", balance);
 }
 
-async function sendTransaction(fromPath: string, toPath: string, mod: string) {
+export async function sendTransaction(fromPath: string, toPath: string, mod: string) {
     let connection: Connection;
     if (mod === "test") {
         connection = new Connection(clusterApiUrl("testnet"), "confirmed");
@@ -174,7 +175,7 @@ async function sendTransaction(fromPath: string, toPath: string, mod: string) {
     ]);
 }
 
-async function main() {
+export async function main() {
     while (true) {
         const answers = await inquirer.prompt([
             {
