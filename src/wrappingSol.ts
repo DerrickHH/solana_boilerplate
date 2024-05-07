@@ -4,14 +4,15 @@ import bs58 from "bs58";
 const { decode } = bs58;
 
 (async () => {
-    const connection = new Connection(clusterApiUrl('testnet'), 'confirmed');
+    const connection = new Connection("https://long-wild-snowflake.solana-testnet.quiknode.pro/97930ab1af818317ba8dd01ebf06d768e7a81f17/", 'confirmed');
     const wallet = Keypair.fromSecretKey(
+        // 替换私钥
         decode("Z9QXoFwTFUuxHjiQutuq6CKqecevKU4ovbnJEsLq6w6KzCtmVeWdjD356reb9YZe3F1DFKNe1Yvd9iYFCC5yutJ")
     );
 
     const airdropSignature = await connection.requestAirdrop(
         wallet.publicKey,
-        2 * LAMPORTS_PER_SOL,
+        1 * LAMPORTS_PER_SOL,
     );
 
     await connection.confirmTransaction(airdropSignature);
