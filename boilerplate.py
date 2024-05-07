@@ -1,7 +1,9 @@
-from solathon import Client, Keypair, PublicKey, Transaction
+import time
+from solana.rpc.api import Client
+from solders.keypair import Keypair
+from solana.transaction import Transaction
+from solders.system_program import TransferParams, transfer
 import argparse
-from solathon.core.instructions import transfer
-import os
 
 test_net = "https://api.testnet.solana.com"
 dev_net = "https://api.devnet.solana.com"
@@ -15,13 +17,13 @@ def create_account(mod):
     if mod == "dev":
         client = Client(dev_net)
     new_account = Keypair()
-    print(new_account.public_key, new_account.private_key)
+    print(new_account.pubkey(), new_account.secret())
 
     # 将生成内容写入 txt 中
-    write_to_txt(new_account.public_key, new_account.private_key)
-    res = client.request_airdrop(new_account.public_key, amount)
+    write_to_txt(new_account.pubkey(), new_account.secret())
+    res = client.request_airdrop(new_account.pubkey(), amount)
     print("Air drop response: ", res)
-    balance = client.get_balance(new_account.public_key)
+    balance = client.get_balance(new_account.pubkey())
     print("Balance is: ", balance)
 
 
@@ -36,9 +38,9 @@ def import_account(file_path, mod):
         for line in file:
             line = line.strip()
             keypairs.append(line)
-    public_key = PublicKey(keypairs[0])
-    balance = client.get_balance(public_key)
-
+    b58_string = keypairs[1]
+    keypair = Keypair.from_base58_string(b58_string)
+    balance = client.get_balance(keypair.pubkey())
     print("Balance is: ", balance)
 
 
@@ -53,34 +55,34 @@ def send_transaction(from_path, to_path, mod):
         for line in file:
             line = line.strip()
             from_key.append(line)
-    from_public_key = PublicKey(from_key[0])
-    from_balance = client.get_balance(from_public_key)
+    sender = Keypair.from_base58_string(from_key[1])
+    from_balance = client.get_balance(sender.pubkey())
     print("Balance of sender is: ", from_balance)
-    sender = Keypair().from_private_key(from_key[1])
 
     to_key = []
     with open(to_path, "r") as file:
         for line in file:
             line = line.strip()
             to_key.append(line)
-    to_public_key = PublicKey(to_key[0])
-    to_balance = client.get_balance(to_public_key)
+    receiver = Keypair.from_base58_string(to_key[1])
+    to_balance = client.get_balance(receiver.pubkey())
     print("Balance of receiver is: ", to_balance)
 
     amount = 10000
 
-    instruction = transfer(
-        from_public_key=sender.public_key,
-        to_public_key=to_public_key,
-        lamports=amount
-    )
-    transaction = Transaction(instructions=[instruction], signers=[sender])
-    result = client.send_transaction(transaction)
+    transaction = Transaction().add(transfer(TransferParams(
+        from_pubkey=sender.pubkey(),
+        to_pubkey=receiver.pubkey(),
+        lamports=amount,
+    )))
+    result = client.send_transaction(transaction, sender)
     print(result)
 
-    from_balance = client.get_balance(from_public_key)
+    time.sleep(10)
+
+    from_balance = client.get_balance(sender.pubkey())
     print("After transfer, balance of sender is: ", from_balance)
-    to_balance = client.get_balance(to_public_key)
+    to_balance = client.get_balance(receiver.pubkey())
     print("After transfer, balance of receiver is: ", to_balance)
 
 
