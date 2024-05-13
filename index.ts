@@ -12,7 +12,9 @@ import {
     getToken,
     CUSTOM_FEE,
 } from './helpers';
+import { MarketCache, PoolCache } from './cache';
 import {
+    TransactionExecutor,
     DefaultTransactionExecutor,
     WrapTransactionExecutor,
 } from './transactions';
