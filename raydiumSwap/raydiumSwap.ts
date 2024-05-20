@@ -15,6 +15,7 @@ class RaydiumSwap {
         this.wallet = new Wallet(Keypair.fromSecretKey(Uint8Array.from(bs58.decode(WALLET_PRIVATE_KEY))));
     }
 
+    // fetches the liquidity pool information from a given JSON configuration file and stores it within the class
     async loadPoolKeys(liquidityFile: string) {
         const liquidityJsonResp = await fetch(liquidityFile);
         if (!liquidityJsonResp.ok) return;
@@ -74,6 +75,10 @@ class RaydiumSwap {
         const { minAmountOut, amountIn } = await this.calcAmountOut(poolKeys, amount, directionIn);
         console.log({ minAmountOut, amountIn });
         const userTokenAccounts = await this.getOwnerTokenAccounts()
+        // 在这个过程中，会将 token 转为 WSOL
+        // handle currency in & out (convert SOL to WSOL)
+        // const tokenIn = amountIn instanceof TokenAmount ? amountIn.token : Token.WSOL
+        // const tokenOut = amountOut instanceof TokenAmount ? amountOut.token : Token.WSOL
         const swapTransaction = await Liquidity.makeSwapInstructionSimple({
             connection: this.connection,
             makeTxVersion: useVersionedTransaction ? 0:1,
