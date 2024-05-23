@@ -89,7 +89,7 @@ async def create_transaction(quote: dict) -> dict:
         response = await client.post("https://quote-api.jup.ag/v6/swap", json=parameters)
         return response.json()
 
-
+# 对于大多数简单交易来说，Transaction 足够用了，但如果你希望你的代码具有更好的扩展性和兼容性，VersionedTransaction 是更好的选择
 def send_transaction(swap_transaction: dict, opts: TxOpts) -> Signature:
     raw_txn = VersionedTransaction.from_bytes(base64.b64decode(swap_transaction))
     signature = config().keypair.sign_message(message.to_bytes_versioned(raw_txn.message))
