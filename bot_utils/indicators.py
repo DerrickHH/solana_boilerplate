@@ -3,7 +3,10 @@ import pandas as pd
 
 # Calculates EMA using DataFrame
 def calculate_ema(dataframe: pd.DataFrame, length: int) -> int:
+    # 指数加权移动平均线（Exponentially Weighted Moving Average，简称 EWMA）
+    # 当短期 EMA 高于长期 EMA 时，可能表示上升趋势，适合买入；反之则可能表示下降趋势
     ema = dataframe['close'].ewm(span=length, adjust=False).mean()
+    # 从生成的 EMA 序列中提取最后一个值，即最新的 EMA 值
     return ema.iat[-1]
 
 
